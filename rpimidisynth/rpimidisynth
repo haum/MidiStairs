@@ -1,0 +1,8 @@
+#!/bin/sh
+fluidsynth \
+  --audio-driver=alsa \
+  --no-shell \
+  --server \
+  --gain 3 \
+  --load-config /etc/rpimidisynth/fluidsynth.conf \
+  /usr/share/sounds/sf2/FluidR3_GM.sf2

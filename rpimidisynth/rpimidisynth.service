@@ -1,0 +1,10 @@
+[Unit]
+Description=RPi MIDI Synth daemon
+
+[Service]
+ExecStart=/usr/local/bin/rpimidisynth
+Type=simple
+User=root
+
+[Install]
+WantedBy=multi-user.target
