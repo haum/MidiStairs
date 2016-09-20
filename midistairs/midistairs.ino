@@ -9,6 +9,7 @@
 #include "MIDIUSB.h"
 
 #define NBSTAIRS 20
+#define DEBOUNCE 5
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
@@ -27,13 +28,14 @@ void noteOff(byte channel, byte pitch, byte velocity) {
 }
 
 bool pressed[NBSTAIRS];
+char counters[NBSTAIRS];
 
 void setup() {
   Serial.begin(115200);
 
   for (int i = 1; i<NBSTAIRS; i++) {
     pinMode(i, INPUT_PULLUP);
-    pressed[i] = false;
+    pressed[i] = 0;
   }
 }
 
@@ -49,17 +51,26 @@ void controlChange(byte channel, byte control, byte value) {
 
 void loop() {
   for (int i = 1; i < NBSTAIRS; i++) {
-    if ((digitalRead(i)==LOW)!=pressed[i]) {
-      pressed[i] = !pressed[i];
-      if (pressed[i]) {
+    int r = digitalRead(i);
+    char & c = counters[i];
+
+    c += r ? 1 : -1;
+    if (c <= 0) {
+      if (pressed[i] == false) {
+        pressed[i] = true;
         Serial.println("Sending note on");
         noteOn(1, 48+i, 100);   // Channel 0, middle C, normal velocity
         MidiUSB.flush();
-      } else {
+      }
+      c = 0;
+    } else if (c >= DEBOUNCE) {
+      if (pressed[i] == true) {
+        pressed[i] = false;
         Serial.println("Sending note off");
         noteOff(1, 48+i, 100);  // Channel 0, middle C, normal velocity
         MidiUSB.flush();
       }
+      c = DEBOUNCE;
     }
   }
 }
