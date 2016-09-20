@@ -8,6 +8,8 @@
 
 #include "MIDIUSB.h"
 
+#define NBSTAIRS 20
+
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
 // Channel can be anything between 0-15. Typically reported to the user as 1-16.
@@ -24,12 +26,12 @@ void noteOff(byte channel, byte pitch, byte velocity) {
   MidiUSB.sendMIDI(noteOff);
 }
 
-bool pressed[20];
+bool pressed[NBSTAIRS];
 
 void setup() {
   Serial.begin(115200);
 
-  for (int i = 1; i<20; i++) {
+  for (int i = 1; i<NBSTAIRS; i++) {
     pinMode(i, INPUT_PULLUP);
     pressed[i] = false;
   }
@@ -46,7 +48,7 @@ void controlChange(byte channel, byte control, byte value) {
 }
 
 void loop() {
-  for (int i = 1; i < 20; i++) {
+  for (int i = 1; i < NBSTAIRS; i++) {
     if ((digitalRead(i)==LOW)!=pressed[i]) {
       pressed[i] = !pressed[i];
       if (pressed[i]) {
